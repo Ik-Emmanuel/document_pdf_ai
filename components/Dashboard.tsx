@@ -1,7 +1,7 @@
 "use client";
 
 import { trpc } from "@/app/_trcp/client";
-// import UploadButton from './UploadButton'
+import UploadButton from "./UploadButton";
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
@@ -43,7 +43,7 @@ const Dashboard = () => {
           Uploaded Documents
         </h1>
 
-        {/* <UploadButton isSubscribed={subscriptionPlan.isSubscribed} /> */}
+        <UploadButton isSubscribed />
       </div>
 
       {/* display all user files */}
