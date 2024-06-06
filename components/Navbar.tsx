@@ -2,8 +2,12 @@ import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import Image from "next/image";
 import { buttonVariants } from "./ui/button";
-import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/server";
-import { ArrowRight } from "lucide-react";
+import {
+  LoginLink,
+  RegisterLink,
+  LogoutLink,
+} from "@kinde-oss/kinde-auth-nextjs/server";
+import { ArrowRight, LogOut } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -53,6 +57,14 @@ const Navbar = () => {
               >
                 Sign Up <ArrowRight className="h-5 w-5 ml-1.5" />
               </RegisterLink>
+
+              <LogoutLink
+                className={buttonVariants({
+                  size: "sm",
+                })}
+              >
+                Logout <LogOut className="h-5 w-5 ml-1.5" />
+              </LogoutLink>
             </>
           </div>
         </div>
