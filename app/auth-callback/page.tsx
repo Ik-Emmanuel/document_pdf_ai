@@ -15,6 +15,8 @@ const Page = () => {
   const { data, isSuccess, isError, error } = trpc.authCallback.useQuery(
     undefined,
     {
+      // deprecated  feature onSuccess and onError
+
       // onSuccess: ({ success }) => {
       //   if (success) {
       //     // user is synced to db
@@ -34,7 +36,7 @@ const Page = () => {
   // react tanc stack query onSuccess is depreicated
   //tanstack.com/query/latest/docs/framework/react/reference/useQuery#:%7E:text=onSuccess%3A%20(data%3A%20TData,next%20major%20version
 
-  https: useEffect(() => {
+  useEffect(() => {
     if (error) {
       // something went wrong
       router.push("/sign-in");

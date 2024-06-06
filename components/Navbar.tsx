@@ -6,10 +6,16 @@ import {
   LoginLink,
   RegisterLink,
   LogoutLink,
+  getKindeServerSession,
 } from "@kinde-oss/kinde-auth-nextjs/server";
 import { ArrowRight, LogOut } from "lucide-react";
+import UserAccountNav from "./UserAccountNav";
+import MobileNav from "./MobileNav";
 
-const Navbar = () => {
+const Navbar = async () => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
   return (
     <nav
       className="sticky h-14 inset-x-0 top-0 z-30 w-full
@@ -31,41 +37,67 @@ const Navbar = () => {
           </Link>
 
           {/* add mobile navbar  */}
-          <div className="hidden items-center space-x-4 sm:flex">
-            <>
-              <Link
-                href="/pricing"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                })}
-              >
-                Pricing
-              </Link>
-              <LoginLink
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "sm",
-                })}
-              >
-                Sign in
-              </LoginLink>
-              <RegisterLink
-                className={buttonVariants({
-                  size: "sm",
-                })}
-              >
-                Sign Up <ArrowRight className="h-5 w-5 ml-1.5" />
-              </RegisterLink>
 
-              <LogoutLink
-                className={buttonVariants({
-                  size: "sm",
-                })}
-              >
-                Logout <LogOut className="h-5 w-5 ml-1.5" />
-              </LogoutLink>
-            </>
+          <MobileNav isAuth={!!user} />
+          <div className="hidden items-center space-x-4 sm:flex">
+            {!user ? (
+              <>
+                <Link
+                  href="/pricing"
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "sm",
+                  })}
+                >
+                  Pricing
+                </Link>
+                <LoginLink
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "sm",
+                  })}
+                >
+                  Sign in
+                </LoginLink>
+                <RegisterLink
+                  className={buttonVariants({
+                    size: "sm",
+                  })}
+                >
+                  Sign Up <ArrowRight className="h-5 w-5 ml-1.5" />
+                </RegisterLink>
+
+                {/* <LogoutLink
+                  className={buttonVariants({
+                    size: "sm",
+                  })}
+                >
+                  Logout <LogOut className="h-5 w-5 ml-1.5" />
+                </LogoutLink> */}
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "sm",
+                  })}
+                >
+                  Dashboard
+                </Link>
+
+                <UserAccountNav
+                  name={
+                    !user.given_name || !user.family_name
+                      ? "Your Account"
+                      : `${user.given_name} ${user.family_name}`
+                  }
+                  email={user.email ?? ""}
+                  imageUrl={user.picture ?? ""}
+                />
+              </>
+            )}
           </div>
         </div>
       </MaxWidthWrapper>
