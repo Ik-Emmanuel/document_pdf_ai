@@ -38,7 +38,7 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.51.5",
     "react-loading-skeleton": "^3.4.0",
-    "react-pdf": "^9.0.0",
+    "react-pdf": "^7.7.3",
     "react-resize-detector": "^10.0.1",
     "simplebar-react": "^3.2.5",
     "tailwind-merge": "^2.3.0",

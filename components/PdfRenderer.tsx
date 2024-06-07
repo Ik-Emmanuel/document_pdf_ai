@@ -175,7 +175,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             <Document
               loading={
                 <div className="flex justify-center">
-                  <Loader2 className="my-24 h-6 w-6 animate-spin" />
+                  <Loader2 className="my-24 h-7 w-7 animate-spin" />
                 </div>
               }
               onLoadError={() => {
