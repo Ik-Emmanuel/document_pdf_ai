@@ -20,21 +20,20 @@ const Dashboard = () => {
   >(null);
 
   const utils = trpc.useContext();
-  const files = undefined;
-  // const { data: files, isLoading } = trpc.getUserFiles.useQuery()
 
-  // const { mutate: deleteFile } =
-  //   trpc.deleteFile.useMutation({
-  //     onSuccess: () => {
-  //       utils.getUserFiles.invalidate()
-  //     },
-  //     onMutate({ id }) {
-  //       setCurrentlyDeletingFile(id)
-  //     },
-  //     onSettled() {
-  //       setCurrentlyDeletingFile(null)
-  //     },
-  //   })
+  const { data: files, isLoading } = trpc.getUserFiles.useQuery();
+
+  const { mutate: deleteFile } = trpc.deleteFile.useMutation({
+    onSuccess: () => {
+      utils.getUserFiles.invalidate();
+    },
+    onMutate({ id }) {
+      setCurrentlyDeletingFile(id);
+    },
+    onSettled() {
+      setCurrentlyDeletingFile(null);
+    },
+  });
 
   return (
     <main className="mx-auto max-w-7xl md:p-10">
@@ -49,6 +48,7 @@ const Dashboard = () => {
       {/* display all user files */}
       {files && files?.length !== 0 ? (
         <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
+          {/* sort the files with javascript */}
           {files
             .sort(
               (a, b) =>
@@ -88,9 +88,7 @@ const Dashboard = () => {
                   </div>
 
                   <Button
-                    //   onClick={() =>
-                    //     deleteFile({ id: file.id })
-                    //   }
+                    onClick={() => deleteFile({ id: file.id })}
                     size="sm"
                     className="w-full"
                     variant="destructive"
@@ -105,10 +103,9 @@ const Dashboard = () => {
               </li>
             ))}
         </ul>
+      ) : isLoading ? (
+        <Skeleton height={100} className="my-2" count={2} />
       ) : (
-        // : isLoading ? (
-        //   <Skeleton height={100} className='my-2' count={3} />
-        // )
         <div className="mt-16 flex flex-col items-center gap-2">
           <Ghost className="h-8 w-8 text-zinc-800" />
           <h3 className="font-semibold text-xl">Pretty empty around here</h3>
