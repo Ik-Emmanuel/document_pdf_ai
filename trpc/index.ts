@@ -55,6 +55,7 @@ export const appRouter = router({
 
     //api 3
     deleteFile: privateProcedure
+        // enforce types at runtime (make sure we always pass the id to this function)
         .input(z.object({ id: z.string() }))
         .mutation(async ({ ctx, input }) => {
             const { userId } = ctx
@@ -62,6 +63,7 @@ export const appRouter = router({
             const file = await db.file.findFirst({
                 where: {
                     id: input.id,
+                    // ensure its the owner that deletes
                     userId,
                 },
             })
