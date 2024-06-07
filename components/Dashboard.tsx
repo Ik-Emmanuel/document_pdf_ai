@@ -19,17 +19,22 @@ const Dashboard = () => {
     string | null
   >(null);
 
+  // used to force a refresh when an action is carried out
   const utils = trpc.useContext();
 
   const { data: files, isLoading } = trpc.getUserFiles.useQuery();
 
+  // mutate is object passed : deleteFile is an alias we can call within this component
   const { mutate: deleteFile } = trpc.deleteFile.useMutation({
     onSuccess: () => {
+      // use the invalidate method to refresh the data
       utils.getUserFiles.invalidate();
     },
     onMutate({ id }) {
       setCurrentlyDeletingFile(id);
     },
+
+    // reset all loading state back here
     onSettled() {
       setCurrentlyDeletingFile(null);
     },
