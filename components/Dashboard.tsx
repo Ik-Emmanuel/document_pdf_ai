@@ -2,7 +2,7 @@
 
 import { trpc } from "@/app/_trcp/client";
 import UploadButton from "./UploadButton";
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
+import { File, Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
@@ -44,7 +44,7 @@ const Dashboard = () => {
     <main className="mx-auto max-w-7xl md:p-10">
       <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
         <h1 className="mb-3 font-bold text-2xl px-10 text-gray-900">
-          Uploaded Documents
+          Your Uploaded Documents
         </h1>
 
         <UploadButton isSubscribed />
@@ -71,6 +71,7 @@ const Dashboard = () => {
                 >
                   <div className="pt-6 px-6 flex w-full items-center justify-between space-x-6">
                     <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
+                    {/* <File className="h-5 w-5 fill-blue-600 outline-blue-400" /> */}
                     <div className="flex-1 truncate">
                       <div className="flex items-center space-x-3">
                         <h3 className="truncate text-lg font-medium text-zinc-900">
@@ -89,7 +90,6 @@ const Dashboard = () => {
 
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
-                    mocked
                   </div>
 
                   <Button
@@ -114,7 +114,7 @@ const Dashboard = () => {
         <div className="mt-16 flex flex-col items-center gap-2">
           <Ghost className="h-8 w-8 text-zinc-800" />
           <h3 className="font-semibold text-xl">Pretty empty around here</h3>
-          <p>Let&apos;s upload your first PDF.</p>
+          <p>Upload your first PDF.</p>
         </div>
       )}
     </main>
