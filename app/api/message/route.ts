@@ -3,9 +3,11 @@ import { openai } from '@/lib/openai'
 import { getPineconeClient } from '@/lib/pinecone'
 import { SendMessageValidator } from '@/lib/validators/SendMessageValidator'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-import { PineconeStore } from 'langchain/vectorstores/pinecone'
+// import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
+// import { PineconeStore } from 'langchain/vectorstores/pinecone'
 import { NextRequest } from 'next/server'
+import { PineconeStore } from "@langchain/pinecone";
+import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 
@@ -54,8 +56,11 @@ export const POST = async (req: NextRequest) => {
     openAIApiKey: process.env.OPENAI_API_KEY,
   })
 
-  const pinecone = await getPineconeClient()
-  const pineconeIndex = pinecone.Index('docinsight')
+
+  const {client: pinecone, pineconeIndex} = await getPineconeClient()
+
+  // const pinecone = await getPineconeClient()
+  // const pineconeIndex = pinecone.Index('docinsight')
 
   const vectorStore = await PineconeStore.fromExistingIndex(
     embeddings,
@@ -67,9 +72,12 @@ export const POST = async (req: NextRequest) => {
 
   const results = await vectorStore.similaritySearch(
     message,
+    // number of responses to return 
     4
   )
 
+
+  // get previous chat messages
   const prevMessages = await db.message.findMany({
     where: {
       fileId,
@@ -95,11 +103,11 @@ export const POST = async (req: NextRequest) => {
       {
         role: 'system',
         content:
-          'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+          'Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format.',
       },
       {
         role: 'user',
-        content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
+        content: `Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
         
   \n----------------\n
   

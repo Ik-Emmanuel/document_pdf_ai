@@ -8,13 +8,23 @@ import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 import { ChatContextProvider } from "./ChatContext";
 import { PLANS } from "@/config/stripe";
+import { useEffect, useState } from "react";
+import { UploadStatus } from "@prisma/client";
 
 interface ChatWrapperProps {
   fileId: string;
   isSubscribed: boolean;
 }
 
+interface dataStatus {
+  status: UploadStatus | undefined;
+}
+
 const ChatWrapper = ({ fileId, isSubscribed }: ChatWrapperProps) => {
+  const [dataStatus, setDataStatus] = useState<dataStatus>({
+    status: undefined,
+  });
+
   const { data, isLoading } = trpc.getFileUploadStatus.useQuery(
     {
       fileId,
@@ -22,9 +32,18 @@ const ChatWrapper = ({ fileId, isSubscribed }: ChatWrapperProps) => {
     {
       // keep polling until the file has a certain status then stop "false" else keep polling ever 500 ms
       refetchInterval: (data) =>
-        data?.status === "SUCCESS" || data?.status === "FAILED" ? false : 500,
+        dataStatus?.status === "SUCCESS" || dataStatus?.status === "FAILED"
+          ? false
+          : 500,
     }
   );
+
+  useEffect(() => {
+    if (data) {
+      // data obtained
+      setDataStatus(data);
+    }
+  }, [data]);
 
   // handle the different states that the system could be in when processing the data
   if (isLoading)
