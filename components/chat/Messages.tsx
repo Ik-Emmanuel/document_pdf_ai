@@ -14,7 +14,7 @@ interface MessagesProps {
 const Messages = ({ fileId }: MessagesProps) => {
   const { isLoading: isAiThinking } = useContext(ChatContext);
 
-  // fetch the data from the database
+  // fetch the data from the database rather than useQuery we call useInfiniteQuery
   const { data, isLoading, fetchNextPage } =
     trpc.getFileMessages.useInfiniteQuery(
       {
@@ -22,31 +22,37 @@ const Messages = ({ fileId }: MessagesProps) => {
         limit: INFINITE_QUERY_LIMIT,
       },
       {
+        // react query use to know where to start fetching
         getNextPageParam: (lastPage) => lastPage?.nextCursor,
         keepPreviousData: true,
       }
     );
 
+  // cos of useInfinitQuery to get the message we use a flat map returns array's of arrays as just arrays
   const messages = data?.pages.flatMap((page) => page.messages);
 
+  // AI thinking message
   const loadingMessage = {
     createdAt: new Date().toISOString(),
     id: "loading-message",
     isUserMessage: false,
     text: (
       <span className="flex h-full items-center justify-center">
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="h-4 w-4 animate-spin text-blue-700" />
       </span>
     ),
   };
 
   const combinedMessages = [
+    // while ai is loading add is  loading to list of new messages
     ...(isAiThinking ? [loadingMessage] : []),
     ...(messages ?? []),
   ];
 
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
+  // check if cursor last element is intersecting with our screen to begin fetching new messages
+  // use mantine hooks @mantine/hooks
   const { ref, entry } = useIntersection({
     root: lastMessageRef.current,
     threshold: 1,
@@ -61,11 +67,13 @@ const Messages = ({ fileId }: MessagesProps) => {
   return (
     <div className="flex max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 flex-col-reverse gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
       {combinedMessages && combinedMessages.length > 0 ? (
+        // means we have messages
         combinedMessages.map((message, i) => {
+          // check if multiple message is from same person (not all AI: 1 msg human : 1 msg)
           const isNextMessageSamePerson =
             combinedMessages[i - 1]?.isUserMessage ===
             combinedMessages[i]?.isUserMessage;
-
+          // if we are rendering out the last message
           if (i === combinedMessages.length - 1) {
             return (
               <Message
@@ -92,6 +100,7 @@ const Messages = ({ fileId }: MessagesProps) => {
           <Skeleton className="h-16" />
         </div>
       ) : (
+        // means there are no messages
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <MessageSquare className="h-8 w-8 text-blue-500" />
           <h3 className="font-semibold text-xl">You&apos;re all set!</h3>

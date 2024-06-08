@@ -8,6 +8,7 @@ import { TRPCError } from '@trpc/server'
 import { db } from '@/db'
 import { z } from 'zod'
 import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
+import { getPineconeClient } from '@/lib/pinecone'
 
 
 // define all api endpoints here 
@@ -71,11 +72,40 @@ export const appRouter = router({
 
             if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
 
+         
+
             await db.file.delete({
                 where: {
                     id: input.id,
                 },
             })
+
+            try{
+
+                // delete vector pinecone 
+                const {client: pinecone, pineconeIndex} = await getPineconeClient()
+                const ns = pineconeIndex.namespace(file.id)
+                await ns.deleteAll()
+                // console.log("vector deleted")
+
+
+            }catch(err){
+                console.log(err)
+            }
+
+            try{
+
+                // delete all messages
+                await db.message.deleteMany({
+                    where: {
+                        fileId: file.id,
+                    },
+                })
+
+
+            }catch(err){
+                console.log(err)
+            }
 
             return file
         }),
@@ -140,15 +170,18 @@ export const appRouter = router({
 
       if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
 
+        // fetch all the messages related to the file
       const messages = await db.message.findMany({
-        take: limit + 1,
+        take: limit + 1, // the +1 will serve as the cursor once in view, gets the next limit
         where: {
           fileId,
         },
         orderBy: {
           createdAt: 'desc',
         },
-        cursor: cursor ? { id: cursor } : undefined,
+        cursor: cursor ? { id: cursor } : undefined, // once cursor, determine the next batch
+
+        // select just the things we want
         select: {
           id: true,
           isUserMessage: true,
@@ -157,6 +190,7 @@ export const appRouter = router({
         },
       })
 
+      // gets the last     one and saves it to be used as the cursor
       let nextCursor: typeof cursor | undefined = undefined
       if (messages.length > limit) {
         const nextItem = messages.pop()

@@ -68,10 +68,10 @@ const onUploadComplete = async ({
 
     try {
 
-        console.log("we are here")
+  
         // grab the uploadfile in memory
         const response = await fetch(`https://utfs.io/f/${file.key}`)
-        console.log("we are here again")
+
 
         // get pdf as blob 
         const blob = await response.blob()
@@ -82,14 +82,14 @@ const onUploadComplete = async ({
         const pageLevelDocs = await loader.load()
         const pagesAmt = pageLevelDocs.length
 
-        console.log(pagesAmt)
+
 
         const { subscriptionPlan } = metadata
         const isSubscribed = true
         // const { isSubscribed } = subscriptionPlan
 
         // console.log(subscriptionPlan)
-        console.log(isSubscribed)
+     
         
 
         // const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Pro')!.pagesPerPdf
@@ -116,7 +116,7 @@ const onUploadComplete = async ({
             })
         }
 
-        console.log("we are starting pinecone")
+
         // vectorize and index entire document
         // const pinecone = await getPineconeClient()
         // const pineconeIndex = pinecone.Index('docinsight')
@@ -130,9 +130,6 @@ const onUploadComplete = async ({
             openAIApiKey: process.env.OPENAI_API_KEY,
         })
 
-        
-
-         console.log("we pushing pinecone")
         await PineconeStore.fromDocuments(
             pageLevelDocs,
             embeddings,
@@ -141,7 +138,7 @@ const onUploadComplete = async ({
                 namespace: createdFile.id,
             }
         )
-        console.log("We are here pinecone")
+    
 
 
         // update db after pinecone file vectorized indexing operation
