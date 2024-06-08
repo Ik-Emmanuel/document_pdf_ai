@@ -9,6 +9,8 @@ import { NextRequest } from 'next/server'
 import { PineconeStore } from "@langchain/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
+
+// use to format and stream response from openAI 
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 
 
@@ -77,7 +79,7 @@ export const POST = async (req: NextRequest) => {
   )
 
 
-  // get previous chat messages
+  // get previous chat messages last 6 messages
   const prevMessages = await db.message.findMany({
     where: {
       fileId,
@@ -88,10 +90,10 @@ export const POST = async (req: NextRequest) => {
     take: 6,
   })
 
+
+  // format message for open ai  in the way it wants user msg and ai response
   const formattedPrevMessages = prevMessages.map((msg) => ({
-    role: msg.isUserMessage
-      ? ('user' as const)
-      : ('assistant' as const),
+    role: msg.isUserMessage ? ('user' as const) : ('assistant' as const),
     content: msg.text,
   }))
 
@@ -100,35 +102,40 @@ export const POST = async (req: NextRequest) => {
     temperature: 0,
     stream: true,
     messages: [
-      {
-        role: 'system',
-        content:
-          'Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format.',
-      },
-      {
-        role: 'user',
-        content: `Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
-        
-  \n----------------\n
-  
-  PREVIOUS CONVERSATION:
-  ${formattedPrevMessages.map((message) => {
-    if (message.role === 'user')
-      return `User: ${message.content}\n`
-    return `Assistant: ${message.content}\n`
-  })}
-  
-  \n----------------\n
-  
-  CONTEXT:
-  ${results.map((r) => r.pageContent).join('\n\n')}
-  
-  USER INPUT: ${message}`,
-      },
+          {
+            role: 'system',
+            content:
+              'Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format.',
+          },
+          {
+            role: 'user',
+            content: `Use the following pieces of context (or previous conversation if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
+            
+      \n----------------\n
+      
+      PREVIOUS CONVERSATION:
+      ${formattedPrevMessages.map((message) => {
+        if (message.role === 'user')
+          return `User: ${message.content}\n`
+        return `Assistant: ${message.content}\n`
+      })}
+      
+      \n----------------\n
+      
+      
+      CONTEXT:
+      ${results.map((r) => r.pageContent).join('\n\n')}
+      
+      USER INPUT: ${message}`,
+    },
     ],
   })
 
+
+  // streams in real time back to the client
   const stream = OpenAIStream(response, {
+
+    // listen  for the full response and write to db
     async onCompletion(completion) {
       await db.message.create({
         data: {
@@ -141,5 +148,6 @@ export const POST = async (req: NextRequest) => {
     },
   })
 
+  // return and consume in real-time
   return new StreamingTextResponse(stream)
 }

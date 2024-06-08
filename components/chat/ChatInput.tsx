@@ -12,6 +12,7 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
   const { addMessage, handleInputChange, isLoading, message } =
     useContext(ChatContext);
 
+  // used to foucs thing by default
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   return (

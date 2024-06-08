@@ -7,6 +7,7 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { TRPCError } from '@trpc/server'
 import { db } from '@/db'
 import { z } from 'zod'
+import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 
 
 // define all api endpoints here 
@@ -115,8 +116,9 @@ export const appRouter = router({
 
 
         //api 6
-
-        getFileMessages: privateProcedure
+        // infinitely fetch users message from db as user scrolls
+        // .nullish mean it is optional 
+    getFileMessages: privateProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).nullish(),
