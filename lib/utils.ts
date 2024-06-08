@@ -44,10 +44,10 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: "@joshtriedcoding"
+      creator: "@ik-emmanuell"
     },
     icons,
-    metadataBase: new URL('https://quill-jet.vercel.app'),
+    metadataBase: new URL(''),
     themeColor: '#FFF',
     ...(noIndex && {
       robots: {

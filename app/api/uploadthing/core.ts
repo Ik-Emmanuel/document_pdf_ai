@@ -6,12 +6,13 @@ import {
     type FileRouter,
 } from 'uploadthing/next'
 
-// import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-// import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-// import { PineconeStore } from 'langchain/vectorstores/pinecone'
-// import { getPineconeClient } from '@/lib/pinecone'
-// import { getUserSubscriptionPlan } from '@/lib/stripe'
-// import { PLANS } from '@/config/stripe'
+//  Also install - pdf-parse dependency for langchain
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
+import { PineconeStore } from 'langchain/vectorstores/pinecone'
+import { getPineconeClient } from '@/lib/pinecone'
+import { getUserSubscriptionPlan } from '@/lib/stripe'
+import { PLANS } from '@/config/stripe'
 
 const f = createUploadthing()
 
@@ -21,10 +22,10 @@ const middleware = async () => {
 
     if (!user || !user.id) throw new Error('Unauthorized')
 
-    // const subscriptionPlan = await getUserSubscriptionPlan()
+    const subscriptionPlan = await getUserSubscriptionPlan()
 
-    // return { subscriptionPlan, userId: user.id }
-    return { userId: user.id }
+    return { subscriptionPlan, userId: user.id }
+
 }
 
 const onUploadComplete = async ({
@@ -57,57 +58,82 @@ const onUploadComplete = async ({
         },
     })
 
-    try {
-        const response = await fetch(
-            `https://utfs.io/f/${file.key}`
-        )
 
+    // right after upload we index the contents of the pdf into vectors using a vector database
+    // use superbase or pinecone are options
+
+    try {
+
+        console.log("we are here")
+        // grab the uploadfile in memory
+        const response = await fetch(`https://utfs.io/f/${file.key}`)
+        console.log("we are here again")
+
+        // get pdf as blob 
         const blob = await response.blob()
 
-        // const loader = new PDFLoader(blob)
+        // use langchain library to load the file into memory 
+        const loader = new PDFLoader(blob)
+        // get page content and num of pages 
+        const pageLevelDocs = await loader.load()
+        const pagesAmt = pageLevelDocs.length
 
-        // const pageLevelDocs = await loader.load()
+        console.log(pagesAmt)
 
-        // const pagesAmt = pageLevelDocs.length
-
-        // const { subscriptionPlan } = metadata
+        const { subscriptionPlan } = metadata
+        const isSubscribed = true
         // const { isSubscribed } = subscriptionPlan
+
+        console.log(subscriptionPlan)
+        console.log(isSubscribed)
+        
 
         // const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Pro')!.pagesPerPdf
         // const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === 'Free')!
         //         .pagesPerPdf
 
-        // if (
-        //     (isSubscribed && isProExceeded) ||
-        //     (!isSubscribed && isFreeExceeded)
-        // ) {
-        //     await db.file.update({
-        //         data: {
-        //             uploadStatus: 'FAILED',
-        //         },
-        //         where: {
-        //             id: createdFile.id,
-        //         },
-        //     })
-        // }
 
+        
+        const isProExceeded = false
+        const isFreeExceeded  = false
+
+
+        if (
+            (isSubscribed && isProExceeded) ||
+            (!isSubscribed && isFreeExceeded)
+        ) {
+            await db.file.update({
+                data: {
+                    uploadStatus: 'FAILED',
+                },
+                where: {
+                    id: createdFile.id,
+                },
+            })
+        }
+
+        console.log("we are starting pinecone")
         // vectorize and index entire document
-        // const pinecone = await getPineconeClient()
-        // const pineconeIndex = pinecone.Index('quill')
+        const pinecone = await getPineconeClient()
+        const pineconeIndex = pinecone.Index('docinsight')
 
-        // const embeddings = new OpenAIEmbeddings({
-        //     openAIApiKey: process.env.OPENAI_API_KEY,
-        // })
+        // use open ai to grab the embeddings
+        const embeddings = new OpenAIEmbeddings({
+            openAIApiKey: process.env.OPENAI_API_KEY,
+        })
 
-        // await PineconeStore.fromDocuments(
-        //     pageLevelDocs,
-        //     embeddings,
-        //     {
-        //         pineconeIndex,
-        //         namespace: createdFile.id,
-        //     }
-        // )
+        await PineconeStore.fromDocuments(
+            pageLevelDocs,
+            embeddings,
+            {
+                pineconeIndex,
+                namespace: createdFile.id,
+            }
+        )
+        console.log("We are here pinecone")
 
+
+        // update db after pinecone file vectorized indexing operation
         await db.file.update({
             data: {
                 uploadStatus: 'SUCCESS',
