@@ -8,11 +8,14 @@ import {
 
 //  Also install - pdf-parse dependency for langchain
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-import { PineconeStore } from 'langchain/vectorstores/pinecone'
+// import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
+// import { PineconeStore } from 'langchain/vectorstores/pinecone'
 import { getPineconeClient } from '@/lib/pinecone'
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
+import { PineconeStore } from "@langchain/pinecone";
+import { OpenAIEmbeddings } from "@langchain/openai";
+
 
 const f = createUploadthing()
 
@@ -21,7 +24,7 @@ const middleware = async () => {
     const user = await getUser()
 
     if (!user || !user.id) throw new Error('Unauthorized')
-
+// 
     const subscriptionPlan = await getUserSubscriptionPlan()
 
     return { subscriptionPlan, userId: user.id }
@@ -84,7 +87,7 @@ const onUploadComplete = async ({
         const isSubscribed = true
         // const { isSubscribed } = subscriptionPlan
 
-        console.log(subscriptionPlan)
+        // console.log(subscriptionPlan)
         console.log(isSubscribed)
         
 
@@ -114,19 +117,26 @@ const onUploadComplete = async ({
 
         console.log("we are starting pinecone")
         // vectorize and index entire document
-        const pinecone = await getPineconeClient()
-        const pineconeIndex = pinecone.Index('docinsight')
+        // const pinecone = await getPineconeClient()
+        // const pineconeIndex = pinecone.Index('docinsight')
+
+        const {client: pinecone, pineconeIndex} = await getPineconeClient()
+
+        // console.log(pineconeIndex)
 
         // use open ai to grab the embeddings
         const embeddings = new OpenAIEmbeddings({
             openAIApiKey: process.env.OPENAI_API_KEY,
         })
 
+        
+
+         console.log("we pushing pinecone")
         await PineconeStore.fromDocuments(
             pageLevelDocs,
             embeddings,
             {
-                pineconeIndex,
+                pineconeIndex: pineconeIndex,
                 namespace: createdFile.id,
             }
         )
@@ -143,6 +153,7 @@ const onUploadComplete = async ({
             },
         })
     } catch (err) {
+        console.log(err)
         await db.file.update({
             data: {
                 uploadStatus: 'FAILED',
