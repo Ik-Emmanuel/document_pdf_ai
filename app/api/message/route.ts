@@ -46,7 +46,7 @@ export const POST = async (req: NextRequest) => {
       text: message,
       isUserMessage: true,
       userId,
-      fileId,
+      fileId: fileId,
     },
   })
 
@@ -141,7 +141,7 @@ export const POST = async (req: NextRequest) => {
         data: {
           text: completion,
           isUserMessage: false,
-          fileId,
+          fileId:fileId,
           userId,
         },
       })

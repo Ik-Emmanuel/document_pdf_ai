@@ -94,14 +94,23 @@ export const appRouter = router({
             }
 
             try{
-
+                console.log("deleting")
                 // delete all messages
                 await db.message.deleteMany({
                     where: {
-                        fileId: file.id,
+                        File: file,
+                        userId,
+                        fileId: file.id
+                        
                     },
                 })
-
+                console.log("done")
+                await db.message.deleteMany({
+                    where: {
+                        fileId: null
+                    },
+                })
+                console.log("done again")
 
             }catch(err){
                 console.log(err)
