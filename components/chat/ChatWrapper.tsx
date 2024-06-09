@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/app/_trcp/client";
+import { trpc } from "@/app/_trpc/client";
 import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import { ChevronLeft, Loader2, XCircle } from "lucide-react";

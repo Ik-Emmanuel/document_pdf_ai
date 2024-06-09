@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { trpc } from "../_trcp/client";
+import { trpc } from "../_trpc/client";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 

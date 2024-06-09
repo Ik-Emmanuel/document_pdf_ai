@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import Dropzone from "react-dropzone";
 import { Cloud, File, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";
-import { trpc } from "@/app/_trcp/client";
+import { trpc } from "@/app/_trpc/client";
 import { useRouter } from "next/navigation";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useToast } from "./ui/use-toast";

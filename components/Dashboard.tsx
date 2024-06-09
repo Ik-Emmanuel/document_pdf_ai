@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/app/_trcp/client";
+import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
 import { File, Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Link from "next/link";
@@ -45,7 +45,7 @@ const Dashboard = () => {
     <main className="mx-auto max-w-7xl md:p-10">
       <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
         <h1 className="mb-3 font-bold text-2xl px-10 text-gray-900">
-          Your Uploaded Documents
+          Uploaded Resources
         </h1>
 
         <UploadButton isSubscribed />

@@ -3,7 +3,7 @@
 import { ReactNode, createContext, useRef, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { trpc } from "@/app/_trcp/client";
+import { trpc } from "@/app/_trpc/client";
 import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
 // define the context types we will be using
@@ -32,6 +32,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // used for optimistic updates
   const utils = trpc.useContext();
   const { toast } = useToast();
   const backupMessage = useRef("");
@@ -53,17 +54,21 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
       return response.body;
     },
+
+    // optimistic update send message as soon as enter is clicked
     onMutate: async ({ message }) => {
+      // create message backup for if things go wrong
       backupMessage.current = message;
       setMessage("");
 
-      // step 1
+      // step 1 (cancel any outgoing refetches so it doesnt overwrite our update)
       await utils.getFileMessages.cancel();
 
-      // step 2
+      // step 2 (snapshot previous values we have)
       const previousMessages = utils.getFileMessages.getInfiniteData();
 
-      // step 3
+      // step 3 (optimistically insert new message write away as we send it )
+      // like get infinit data trpc tankstack has setInfinite data
       utils.getFileMessages.setInfiniteData(
         { fileId, limit: INFINITE_QUERY_LIMIT },
         (old) => {
