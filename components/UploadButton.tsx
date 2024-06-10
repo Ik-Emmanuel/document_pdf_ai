@@ -69,6 +69,7 @@ const UploadDropzone = ({ isSubscribed }: { isSubscribed: boolean }) => {
           });
         }
 
+        // get response from upload thing (details of the just uploaded file )
         const [fileResponse] = res;
 
         const key = fileResponse?.key;
@@ -84,7 +85,7 @@ const UploadDropzone = ({ isSubscribed }: { isSubscribed: boolean }) => {
         clearInterval(progressInterval);
         setUploadProgress(100);
 
-        // wait until file is recorded in the db before moving ahead
+        // wait until file is recorded in the db before moving ahead (call the mutate to check file is in db keep trying indefinitely)
         startPolling({ key });
       }}
     >
