@@ -1,10 +1,24 @@
+
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { useEffect } from "react";
+import { validateUser } from "@/actions/user";
 
-export default function Home() {
+
+export default async function Home() {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+    if (user) {
+      // console.log("found user ", user);
+      validateUser(user);
+    }
+ 
+
   return (
     <>
       <MaxWidthWrapper className="mb-12 mt-28 sm:mt-30 flex flex-col items-center justify-center text-center">
@@ -28,16 +42,19 @@ export default function Home() {
           from any PDF document. Simply upload your file and start asking
           questions right away.
         </p>
-        <Link
-          className={buttonVariants({
-            size: "lg",
-            className: "mt-5",
-          })}
-          href={"/dashboard"}
-          // target="_blank"
-        >
-          Get started <ArrowRight className="ml-2  h-5 w-5" />
-        </Link>
+
+        {user && (
+          <Link
+            className={buttonVariants({
+              size: "lg",
+              className: "mt-5",
+            })}
+            href={"/dashboard"}
+            // target="_blank"
+          >
+            Get started <ArrowRight className="ml-2  h-5 w-5" />
+          </Link>
+        )}
       </MaxWidthWrapper>
 
       {/* value proposition section  */}
@@ -61,7 +78,7 @@ export default function Home() {
               <div className="mt-16 flow-root sm:mt-24">
                 <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
                   <Image
-                    src={"/dashboard-preview.jpg"}
+                    src={"/chlor.png"}
                     alt="dashboard-product-preview"
                     width={1164}
                     height={666}
